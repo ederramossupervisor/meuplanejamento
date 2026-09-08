@@ -76,6 +76,7 @@ class API {
             const result = await response.json();
 
             if (result.success === false) {
+                alert(JSON.stringify(result, null, 2));
                 throw new Error(result.error || 'ERRO_DESCONHECIDO');
             }
 
