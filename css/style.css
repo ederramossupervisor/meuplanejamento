@@ -201,7 +201,7 @@ body {
     background-image: url('../assets/icons/icon-512.png');
     background-repeat: no-repeat;
     background-position: center 60px;
-    background-size: min(45vw, 380px);
+    background-size: min(70vw, 600px);
     opacity: 0.06;
     pointer-events: none;
     z-index: -1;
