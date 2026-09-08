@@ -17,9 +17,24 @@ const UI = {
     mostrarUsuario(usuario) {
         const avatar = document.getElementById('user-avatar-mini');
         const nome = document.getElementById('user-name-mini');
-        if (usuario.foto) avatar.src = usuario.foto;
-        else avatar.src = 'assets/images/avatar-padrao.png';
+
+        avatar.onerror = () => { avatar.onerror = null; avatar.src = UI.avatarIniciais(usuario.nome || usuario.email); };
+        avatar.src = usuario.foto ? usuario.foto : UI.avatarIniciais(usuario.nome || usuario.email);
+
         nome.textContent = usuario.nome || usuario.email;
+    },
+    /**
+     * Gera um avatar simples (círculo colorido com a inicial do nome) como
+     * data URI, sem depender de nenhum arquivo de imagem no projeto.
+     */
+    avatarIniciais(nomeOuEmail) {
+        const inicial = (nomeOuEmail || '?').trim().charAt(0).toUpperCase() || '?';
+        const cor = (CONFIG.CORES && CONFIG.CORES.PRIMARY) || '#1a73e8';
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+            <circle cx="40" cy="40" r="40" fill="${cor}"/>
+            <text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#ffffff">${inicial}</text>
+        </svg>`;
+        return 'data:image/svg+xml,' + encodeURIComponent(svg);
     },
     formatarData(dataString) {
         if (!dataString) return '';
