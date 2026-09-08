@@ -53,7 +53,6 @@ const Calendario = {
                     <div id="calendario-grid"></div>
                 </div>
             </div>
-            <div id="calendario-dia-detalhe" class="mt-3"></div>
         `;
         await this.carregarTurmas();
         await this.garantirAnoCarregado(this.anoAtual);
@@ -157,7 +156,6 @@ const Calendario = {
         if (!tituloEl) return;
         const nomesMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
         tituloEl.textContent = `${nomesMeses[this.mesAtual]} de ${this.anoAtual}`;
-        document.getElementById('calendario-dia-detalhe').innerHTML = '';
 
         const primeiroDia = new Date(this.anoAtual, this.mesAtual, 1);
         const diasNoMes = new Date(this.anoAtual, this.mesAtual + 1, 0).getDate();
@@ -203,7 +201,6 @@ const Calendario = {
         const ultimo = dias[6];
         const opcoes = { day: '2-digit', month: '2-digit' };
         tituloEl.textContent = `${primeiro.toLocaleDateString('pt-BR', opcoes)} a ${ultimo.toLocaleDateString('pt-BR', opcoes)} de ${ultimo.getFullYear()}`;
-        document.getElementById('calendario-dia-detalhe').innerHTML = '';
 
         const nomesDias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
         const hoje = new Date();
@@ -245,33 +242,50 @@ const Calendario = {
         `;
     },
 
+    /**
+     * Ao clicar em um dia do calendário, abre um modal listando os planos
+     * daquele dia para o professor selecionar (visualizar/editar) um deles.
+     */
     abrirDia(chave) {
         const planosDoDia = this.planosPorDia[chave] || [];
-        const container = document.getElementById('calendario-dia-detalhe');
+        const titulo = document.getElementById('dia-planos-modal-titulo');
+        const body = document.getElementById('dia-planos-modal-body');
+
+        titulo.innerHTML = `<i class="fas fa-calendar-day"></i> Planos de ${UI.formatarData(chave)}`;
 
         if (planosDoDia.length === 0) {
-            container.innerHTML = `
-                <div class="card"><div class="card-body text-center text-muted">
-                    Nenhum plano para ${UI.formatarData(chave)}.
-                    <button class="btn btn-sm btn-primary ms-2" onclick="app.navegarPara('novo-plano')">Criar plano</button>
-                </div></div>`;
-            return;
-        }
-
-        container.innerHTML = `
-            <div class="card">
-                <div class="card-header bg-white"><strong>Planos de ${UI.formatarData(chave)}</strong></div>
-                <div class="list-group list-group-flush">
+            body.innerHTML = `
+                <div class="text-center text-muted py-3">
+                    Nenhum plano cadastrado para este dia.
+                </div>`;
+        } else {
+            body.innerHTML = `
+                <div class="list-group">
                     ${planosDoDia.map(p => `
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                onclick="Calendario.selecionarPlanoDoDia('${p.id_plano}')" style="border-left: 4px solid ${this.corTurma(p.id_turma)};">
                             <div>
                                 <span class="turma-dot" style="background:${this.corTurma(p.id_turma)};"></span>
-                                <strong>${UI.escaparHTML(p.componente)}</strong> — ${UI.escaparHTML(p.assunto)}
+                                <strong>${UI.escaparHTML(p.componente || '')}</strong> — ${UI.escaparHTML(p.assunto || '')}
+                                <div class="small text-muted">${UI.escaparHTML(this.turmasMap[p.id_turma] || 'Turma não informada')}</div>
                             </div>
-                            <button class="btn-action btn-outline-primary" onclick="Visualizacao.abrir('${p.id_plano}')"><i class="fas fa-eye"></i></button>
-                        </div>
+                            <span class="badge bg-primary">${UI.escaparHTML(p.status || 'Rascunho')}</span>
+                        </button>
                     `).join('')}
-                </div>
-            </div>`;
+                </div>`;
+        }
+
+        const modalEl = document.getElementById('modal-dia-planos');
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    },
+
+    /**
+     * Chamado ao selecionar um plano na lista do modal do dia: fecha o
+     * modal de seleção e abre a prévia do plano escolhido.
+     */
+    selecionarPlanoDoDia(idPlano) {
+        const modalEl = document.getElementById('modal-dia-planos');
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        Visualizacao.abrir(idPlano);
     }
 };
