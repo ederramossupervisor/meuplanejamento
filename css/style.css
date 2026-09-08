@@ -243,6 +243,15 @@ body {
     font-size: 0.9rem;
 }
 
+.turma-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
 .card-plano .assunto {
     font-size: 1.1rem;
     font-weight: 600;

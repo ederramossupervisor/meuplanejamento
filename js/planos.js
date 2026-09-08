@@ -2,10 +2,34 @@
  * LISTAGEM E GESTÃO DE PLANOS DE AULA
  */
 
+const PALETA_CORES_TURMA = [
+    '#4285F4', '#EA4335', '#34A853', '#FBBC04', '#9C27B0',
+    '#FF6D01', '#00ACC1', '#8D6E63', '#EC407A', '#5C6BC0'
+];
+
 const Planos = {
     lista: [],
     turmasMap: {},
+    turmasCoresMap: {},
     filtros: { busca: '', status: '', favoritos: '', ordenar: 'mais_recentes' },
+
+    /**
+     * Gera uma cor estável (sempre a mesma) para uma turma, a partir do seu ID.
+     * Assim cada turma sempre aparece com a mesma cor, sem precisar salvar nada.
+     */
+    corDaTurma(idTurma) {
+        if (!idTurma) return '#adb5bd';
+        if (this.turmasCoresMap[idTurma]) return this.turmasCoresMap[idTurma];
+
+        let hash = 0;
+        const str = String(idTurma);
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const cor = PALETA_CORES_TURMA[Math.abs(hash) % PALETA_CORES_TURMA.length];
+        this.turmasCoresMap[idTurma] = cor;
+        return cor;
+    },
 
     async render() {
         const content = document.getElementById('conteudo');
@@ -116,12 +140,17 @@ const Planos = {
             return;
         }
 
-        container.innerHTML = this.lista.map(plano => `
+        container.innerHTML = this.lista.map(plano => {
+            const corTurma = this.corDaTurma(plano.id_turma);
+            return `
             <div class="col-md-4 mb-3">
-                <div class="card card-plano h-100">
+                <div class="card card-plano h-100" style="border-left: 5px solid ${corTurma};">
                     <div class="card-header">
                         <div class="componente">${UI.escaparHTML(plano.componente || '')}</div>
-                        <div class="turma">${UI.escaparHTML(this.turmasMap[plano.id_turma] || 'Turma não informada')} · ${UI.formatarData(plano.data_aula)}</div>
+                        <div class="turma">
+                            <span class="turma-dot" style="background:${corTurma};"></span>
+                            ${UI.escaparHTML(this.turmasMap[plano.id_turma] || 'Turma não informada')} · ${UI.formatarData(plano.data_aula)}
+                        </div>
                         <div class="assunto">${UI.escaparHTML(plano.assunto || '')}</div>
                     </div>
                     <div class="card-body">
@@ -136,6 +165,9 @@ const Planos = {
                         <button class="btn-action btn-outline-secondary" onclick="app.navegarPara('editar-plano', {idPlano:'${plano.id_plano}'})" title="Editar">
                             <i class="fas fa-edit"></i>
                         </button>
+                        <button class="btn-action btn-outline-info" onclick="Planos.abrirAnexos('${plano.id_plano}')" title="Anexos">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
                         <button class="btn-action btn-outline-warning" onclick="Planos.favoritar('${plano.id_plano}', ${!(plano.favorito === true || plano.favorito === 'true')})" title="Favoritar">
                             <i class="fas fa-star"></i>
                         </button>
@@ -148,7 +180,18 @@ const Planos = {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
+    },
+
+    /**
+     * Abre o modal de anexos do plano, sem precisar entrar na tela de edição.
+     */
+    abrirAnexos(idPlano) {
+        const modalEl = document.getElementById('modal-anexos');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+        DriveAnexos.render(idPlano, 'anexos-modal-body');
     },
 
     async favoritar(idPlano, favorito) {
