@@ -10,6 +10,25 @@ const Calendario = {
 
     planosPorDia: {},
     anosCarregados: new Set(),
+    turmasMap: {},
+
+    async carregarTurmas() {
+        try {
+            const response = await api.get('listarTurmas');
+            this.turmasMap = {};
+            (response.data || []).forEach(t => { this.turmasMap[t.id_turma] = t.nome_turma; });
+        } catch (error) {
+            this.turmasMap = {};
+        }
+    },
+
+    /**
+     * Mesma cor estável usada nos cards de "Meus Planos" (Planos.corDaTurma),
+     * para que a turma apareça sempre com a mesma cor em todas as telas.
+     */
+    corTurma(idTurma) {
+        return Planos.corDaTurma(idTurma);
+    },
 
     async render() {
         const content = document.getElementById('conteudo');
@@ -36,6 +55,7 @@ const Calendario = {
             </div>
             <div id="calendario-dia-detalhe" class="mt-3"></div>
         `;
+        await this.carregarTurmas();
         await this.garantirAnoCarregado(this.anoAtual);
         this.atualizarBotoesModo();
         this.renderConteudo();
@@ -152,10 +172,16 @@ const Calendario = {
             const hoje = new Date();
             const ehHoje = hoje.getFullYear() === this.anoAtual && hoje.getMonth() === this.mesAtual && hoje.getDate() === dia;
 
+            const turmasDoDia = [...new Set(planosDoDia.map(p => p.id_turma))];
+            const dots = turmasDoDia.slice(0, 4).map(idTurma =>
+                `<span class="cal-turma-dot" style="background:${this.corTurma(idTurma)};" title="${UI.escaparHTML(this.turmasMap[idTurma] || '')}"></span>`
+            ).join('');
+
             celulas += `
                 <div class="cal-dia ${ehHoje ? 'cal-dia-hoje' : ''} ${planosDoDia.length ? 'cal-dia-com-plano' : ''}" onclick="Calendario.abrirDia('${chave}')">
                     <span class="cal-dia-numero">${dia}</span>
                     ${planosDoDia.length ? `<span class="badge bg-primary cal-dia-badge">${planosDoDia.length}</span>` : ''}
+                    ${dots ? `<div class="cal-turma-dots">${dots}</div>` : ''}
                 </div>`;
         }
 
@@ -198,7 +224,7 @@ const Calendario = {
                             ${planosDoDia.length === 0
                                 ? '<p class="text-muted small mb-0">Sem planos</p>'
                                 : planosDoDia.map(p => `
-                                    <div class="border rounded p-2 mb-2 small" style="cursor:pointer" onclick="Visualizacao.abrir('${p.id_plano}')">
+                                    <div class="border rounded p-2 mb-2 small cal-plano-item" style="cursor:pointer; border-left: 4px solid ${this.corTurma(p.id_turma)} !important;" onclick="Visualizacao.abrir('${p.id_plano}')">
                                         <strong>${UI.escaparHTML(p.componente || '')}</strong><br>
                                         ${UI.escaparHTML(p.assunto || '')}
                                     </div>
@@ -239,6 +265,7 @@ const Calendario = {
                     ${planosDoDia.map(p => `
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
+                                <span class="turma-dot" style="background:${this.corTurma(p.id_turma)};"></span>
                                 <strong>${UI.escaparHTML(p.componente)}</strong> — ${UI.escaparHTML(p.assunto)}
                             </div>
                             <button class="btn-action btn-outline-primary" onclick="Visualizacao.abrir('${p.id_plano}')"><i class="fas fa-eye"></i></button>
