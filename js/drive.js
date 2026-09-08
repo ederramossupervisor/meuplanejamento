@@ -67,10 +67,19 @@ const DriveAnexos = {
         try {
             // Upload multipart separado de api.post (que envia JSON) — o Apps Script
             // interpreta o campo "arquivo" de um FormData como Blob em e.parameter.
-            const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=uploadAnexo`, {
+            // IMPORTANTE: o token precisa ir na query string aqui também, porque
+            // handleRequest() no backend exige e.parameter.token em toda ação
+            // que não seja "login" (ver getUsuarioAtual em Auth.gs).
+            const token = encodeURIComponent(api.getToken());
+            const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=uploadAnexo&token=${token}`, {
                 method: 'POST',
                 body: formData
             });
+
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+
             const resultado = await response.json();
 
             if (!resultado.success) throw new Error(resultado.error || 'ERRO_UPLOAD');
@@ -79,7 +88,12 @@ const DriveAnexos = {
             input.value = '';
             await this.carregar();
         } catch (error) {
-            Toast.error('Não foi possível enviar o arquivo.');
+            console.error('[DriveAnexos.upload]', error);
+            if (error.message === 'AUTH_ERROR') {
+                Toast.error('Sua sessão expirou. Faça login novamente.');
+            } else {
+                Toast.error('Não foi possível enviar o arquivo.');
+            }
         } finally {
             UI.hideLoading();
         }
