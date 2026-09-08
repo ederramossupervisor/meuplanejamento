@@ -185,6 +185,33 @@ body {
     flex: 1;
 }
 
+/* Marca d'água no fundo do dashboard */
+.dashboard-page {
+    position: relative;
+    z-index: 0;
+}
+
+.dashboard-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../assets/icons/icon-512.png');
+    background-repeat: no-repeat;
+    background-position: center 60px;
+    background-size: min(45vw, 380px);
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.dashboard-page > * {
+    position: relative;
+    z-index: 1;
+}
+
 .card {
     border: none;
     box-shadow: var(--card-shadow);

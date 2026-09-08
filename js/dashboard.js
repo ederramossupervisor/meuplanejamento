@@ -5,6 +5,7 @@ const Dashboard = {
         const primeiroNome = (usuario?.nome || '').trim().split(' ')[0];
         const saudacao = primeiroNome ? `Olá, ${UI.escaparHTML(primeiroNome)}!` : 'Olá, professor(a)!';
         content.innerHTML = `
+            <div class="dashboard-page">
             <h2>${saudacao}</h2>
             <p>Bem-vindo ao ${CONFIG.APP_NAME}</p>
             <div class="row mt-4">
@@ -56,6 +57,7 @@ const Dashboard = {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         `;
 
