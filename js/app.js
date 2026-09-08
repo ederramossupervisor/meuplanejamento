@@ -69,6 +69,36 @@ class App {
         if (btnLogin) {
             btnLogin.addEventListener('click', () => this.loginGoogle());
         }
+
+        // Botão criar planilha (tela de configuração inicial)
+        const btnCriarPlanilha = document.getElementById('btn-criar-planilha');
+        if (btnCriarPlanilha) {
+            btnCriarPlanilha.addEventListener('click', () => this.criarPlanilhaProfessor());
+        }
+    }
+
+    /**
+     * Cria a planilha individual do professor (tela de configuração inicial)
+     */
+    async criarPlanilhaProfessor() {
+        const btn = document.getElementById('btn-criar-planilha');
+        try {
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span> Criando...'; }
+
+            const response = await api.criarPlanilhaProfessor();
+
+            if (response.success) {
+                Toast.success('Planilha criada com sucesso!');
+                await this.verificarConfiguracao();
+            } else {
+                Toast.error(response.message || 'Não foi possível criar a planilha.');
+            }
+        } catch (error) {
+            console.error('Erro ao criar planilha:', error);
+            Toast.error('Não foi possível criar a planilha.');
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus-circle"></i> CRIAR MINHA PLANILHA'; }
+        }
     }
 
     /**
