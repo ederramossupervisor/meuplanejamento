@@ -145,6 +145,7 @@ const Componentes = {
         try {
             UI.showLoading();
             await api.post('salvarComponente', dados);
+            api.invalidarCache('listarComponentes');
             bootstrap.Modal.getInstance(document.getElementById('modal-componente')).hide();
             Toast.success('Componente salvo com sucesso!');
             await this.carregar();
@@ -160,6 +161,7 @@ const Componentes = {
         try {
             UI.showLoading();
             await api.get('excluirComponente', { idComponente });
+            api.invalidarCache('listarComponentes');
             Toast.success('Componente excluído.');
             await this.carregar();
         } catch (error) {

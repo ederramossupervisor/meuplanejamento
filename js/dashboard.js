@@ -71,8 +71,8 @@ const Dashboard = {
     async carregarEstatisticas() {
         try {
             const [respPlanos, respTurmas] = await Promise.all([
-                api.get('buscarPlanos'),
-                api.get('listarTurmas')
+                api.get('buscarPlanos', {}, { cache: true, ttl: 60000 }),
+                api.get('listarTurmas', {}, { cache: true, ttl: 300000 })
             ]);
 
             const planos = respPlanos.data || [];

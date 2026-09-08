@@ -151,6 +151,7 @@ const Turmas = {
         try {
             UI.showLoading();
             await api.post('salvarTurma', dados);
+            api.invalidarCache('listarTurmas');
             bootstrap.Modal.getInstance(document.getElementById('modal-turma')).hide();
             Toast.success('Turma salva com sucesso!');
             await this.carregar();
@@ -166,6 +167,7 @@ const Turmas = {
         try {
             UI.showLoading();
             await api.get('excluirTurma', { idTurma });
+            api.invalidarCache('listarTurmas');
             Toast.success('Turma excluída.');
             await this.carregar();
         } catch (error) {

@@ -157,6 +157,7 @@ class Auth {
      */
     logout() {
         this.limparSessao();
+        if (typeof api !== 'undefined') api.invalidarCache();
         if (typeof google !== 'undefined' && google.accounts) {
             google.accounts.id.disableAutoSelect();
         }

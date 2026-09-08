@@ -14,7 +14,7 @@ const Calendario = {
 
     async carregarTurmas() {
         try {
-            const response = await api.get('listarTurmas');
+            const response = await api.get('listarTurmas', {}, { cache: true, ttl: 300000 });
             this.turmasMap = {};
             (response.data || []).forEach(t => { this.turmasMap[t.id_turma] = t.nome_turma; });
         } catch (error) {
@@ -95,7 +95,7 @@ const Calendario = {
     async garantirAnoCarregado(ano) {
         if (this.anosCarregados.has(ano)) return;
         try {
-            const response = await api.get('buscarPlanos', { anoLetivo: String(ano) });
+            const response = await api.get('buscarPlanos', { anoLetivo: String(ano) }, { cache: true, ttl: 60000 });
             const planos = response.data || [];
             planos.forEach(p => {
                 if (!p.data_aula) return;

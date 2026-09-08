@@ -6,6 +6,10 @@
 class API {
     constructor() {
         this.baseUrl = CONFIG.APPS_SCRIPT_URL;
+        // Cache simples em memória para chamadas GET repetidas (ex: listarTurmas,
+        // buscarPlanos), evitando refazer a mesma consulta ao Apps Script/Sheets
+        // toda vez que o usuário troca de tela em um curto intervalo de tempo.
+        this._cache = new Map();
     }
 
     /**
@@ -19,8 +23,21 @@ class API {
 
     /**
      * Realiza uma chamada GET ao Apps Script
+     * @param {object} opcoes - { cache: boolean, ttl: ms } - quando cache=true,
+     * respostas idênticas (mesmo endpoint + mesmos params) são reaproveitadas
+     * por até `ttl` milissegundos em vez de gerar uma nova requisição.
      */
-    async get(endpoint, params = {}) {
+    async get(endpoint, params = {}, opcoes = {}) {
+        const { cache = false, ttl = 60000 } = opcoes;
+        const chaveCache = cache ? this._chaveCache(endpoint, params) : null;
+
+        if (chaveCache) {
+            const cacheado = this._cache.get(chaveCache);
+            if (cacheado && cacheado.expira > Date.now()) {
+                return cacheado.data;
+            }
+        }
+
         try {
             const queryString = new URLSearchParams({
                 action: endpoint,
@@ -41,11 +58,34 @@ class API {
                 throw new Error(data.error || 'ERRO_DESCONHECIDO');
             }
 
+            if (chaveCache) {
+                this._cache.set(chaveCache, { data, expira: Date.now() + ttl });
+            }
+
             return data;
         } catch (error) {
             console.error(`[API GET] ${endpoint}:`, error);
             this.handleError(error);
             throw error;
+        }
+    }
+
+    _chaveCache(endpoint, params) {
+        return `${endpoint}|${JSON.stringify(params)}`;
+    }
+
+    /**
+     * Invalida entradas do cache. Sem argumento, limpa tudo.
+     * Com `endpoint`, limpa só as chamadas cacheadas daquele endpoint
+     * (ex: invalidarCache('buscarPlanos') após criar/editar/excluir um plano).
+     */
+    invalidarCache(endpoint = null) {
+        if (!endpoint) {
+            this._cache.clear();
+            return;
+        }
+        for (const chave of this._cache.keys()) {
+            if (chave.startsWith(`${endpoint}|`)) this._cache.delete(chave);
         }
     }
 

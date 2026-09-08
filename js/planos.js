@@ -94,7 +94,7 @@ const Planos = {
 
     async carregarTurmas() {
         try {
-            const response = await api.get('listarTurmas');
+            const response = await api.get('listarTurmas', {}, { cache: true, ttl: 300000 });
             this.turmasMap = {};
             (response.data || []).forEach(t => { this.turmasMap[t.id_turma] = t.nome_turma; });
         } catch (error) {
@@ -117,7 +117,7 @@ const Planos = {
         try {
             const params = {};
             Object.entries(this.filtros).forEach(([chave, valor]) => { if (valor) params[chave] = valor; });
-            const response = await api.get('buscarPlanos', params);
+            const response = await api.get('buscarPlanos', params, { cache: true, ttl: 60000 });
             this.lista = response.data || [];
             this.renderLista();
         } catch (error) {
@@ -197,6 +197,7 @@ const Planos = {
     async favoritar(idPlano, favorito) {
         try {
             await api.get('favoritarPlano', { idPlano, favorito });
+            api.invalidarCache('buscarPlanos');
             await this.carregar();
         } catch (error) {
             Toast.error('Não foi possível atualizar o favorito.');
@@ -210,6 +211,7 @@ const Planos = {
         try {
             UI.showLoading();
             await api.post('duplicarPlano', { idPlano, novaTurma: plano.id_turma, novaData: plano.data_aula });
+            api.invalidarCache('buscarPlanos');
             Toast.success('Plano duplicado com sucesso!');
             await this.carregar();
         } catch (error) {
@@ -224,6 +226,7 @@ const Planos = {
         try {
             UI.showLoading();
             await api.get('excluirPlano', { idPlano });
+            api.invalidarCache('buscarPlanos');
             Toast.success('Plano excluído.');
             await this.carregar();
         } catch (error) {

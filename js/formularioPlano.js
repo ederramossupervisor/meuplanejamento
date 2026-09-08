@@ -32,8 +32,8 @@ const FormularioPlano = {
         this.dataCriacao = null;
 
         const [turmasResp, componentesResp] = await Promise.all([
-            api.get('listarTurmas').catch(() => ({ data: [] })),
-            api.get('listarComponentes').catch(() => ({ data: [] }))
+            api.get('listarTurmas', {}, { cache: true, ttl: 300000 }).catch(() => ({ data: [] })),
+            api.get('listarComponentes', {}, { cache: true, ttl: 300000 }).catch(() => ({ data: [] }))
         ]);
         this.turmas = turmasResp.data || [];
         this.componentes = componentesResp.data || [];
@@ -416,6 +416,7 @@ const FormularioPlano = {
                 await api.post('salvarPlano', dados);
                 Toast.success('Plano criado com sucesso!');
             }
+            api.invalidarCache('buscarPlanos');
             app.navegarPara('planos');
         } catch (error) {
             Toast.error('Não foi possível salvar o plano.');
