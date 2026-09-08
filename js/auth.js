@@ -45,8 +45,8 @@ class Auth {
      */
     async aoReceberCredencialGoogle(resposta) {
         try {
-            const login = await api.post('login', { idToken: resposta.credential });
-
+         const login = await api.post('login', { idToken: resposta.credential });
+            alert(JSON.stringify(login, null, 2));
             if (login.success) {
                 this.usuario = login.data.usuario;
                 this.token = login.data.token;
