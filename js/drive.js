@@ -208,173 +208,137 @@ const DriveAnexos = {
      */
     async upload() {
 
-        console.log(
-            '=========================================='
-        );
+    const input = document.getElementById('drive-input-arquivo');
+    const arquivo = input?.files?.[0];
 
-        console.log(
-            '[DriveAnexos.upload] INÍCIO DO UPLOAD'
-        );
+    if (!arquivo) {
+        Toast.warning('Selecione um arquivo primeiro.');
+        return;
+    }
 
-        console.log(
-            '=========================================='
-        );
+    if (!this.idPlano) {
+        Toast.warning('Salve o plano antes de enviar um arquivo.');
+        return;
+    }
 
+    const tiposPermitidos = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png'
+    ];
 
-        const input =
-            document.getElementById(
-                'drive-input-arquivo'
-            );
+    if (!tiposPermitidos.includes(arquivo.type)) {
+        Toast.warning('Apenas PDF, JPG ou PNG são permitidos.');
+        return;
+    }
 
+    const token = api.getToken();
 
-        if (!input) {
+    if (!token) {
+        Toast.error('Sua sessão expirou. Faça login novamente.');
+        return;
+    }
 
-            console.error(
-                '[DriveAnexos.upload] Input de arquivo não encontrado.'
-            );
+    console.log('==========================================');
+    console.log('[DriveAnexos.upload] INICIANDO UPLOAD');
+    console.log('==========================================');
 
-            Toast.error(
-                'Campo de arquivo não encontrado.'
-            );
+    console.log('Arquivo:', arquivo.name);
+    console.log('Tipo:', arquivo.type);
+    console.log('Tamanho:', arquivo.size);
+    console.log('ID plano:', this.idPlano);
 
-            return;
-        }
+    UI.showLoading('Preparando arquivo...');
 
+    try {
 
-        const arquivo =
-            input.files && input.files[0];
-
-
-        if (!arquivo) {
-
-            console.warn(
-                '[DriveAnexos.upload] Nenhum arquivo selecionado.'
-            );
-
-            Toast.warning(
-                'Selecione um arquivo primeiro.'
-            );
-
-            return;
-        }
-
-
-        /**
-         * Informações do arquivo
+        /*
+         * Converte o arquivo para Base64.
          */
+        const base64 = await new Promise((resolve, reject) => {
+
+            const reader = new FileReader();
+
+            reader.onload = () => {
+
+                try {
+
+                    const resultado = reader.result;
+
+                    /*
+                     * FileReader retorna algo como:
+                     *
+                     * data:application/pdf;base64,JVBERi0x...
+                     *
+                     * Precisamos somente da parte depois da vírgula.
+                     */
+
+                    const base64Data =
+                        resultado.split(',')[1];
+
+                    if (!base64Data) {
+                        reject(
+                            new Error(
+                                'Não foi possível converter o arquivo para Base64.'
+                            )
+                        );
+                        return;
+                    }
+
+                    resolve(base64Data);
+
+                } catch (error) {
+
+                    reject(error);
+
+                }
+
+            };
+
+            reader.onerror = () => {
+
+                reject(
+                    new Error(
+                        'Erro ao ler o arquivo.'
+                    )
+                );
+
+            };
+
+            reader.readAsDataURL(arquivo);
+
+        });
+
+
         console.log(
-            '[DriveAnexos.upload] Arquivo:',
-            arquivo.name
+            '[DriveAnexos.upload] Arquivo convertido para Base64.'
         );
 
         console.log(
-            '[DriveAnexos.upload] Tipo:',
-            arquivo.type
-        );
-
-        console.log(
-            '[DriveAnexos.upload] Tamanho:',
-            arquivo.size,
-            'bytes'
-        );
-
-        console.log(
-            '[DriveAnexos.upload] ID do plano:',
-            this.idPlano
+            '[DriveAnexos.upload] Tamanho Base64:',
+            base64.length
         );
 
 
-        /**
-         * Verifica se existe plano
+        UI.showLoading('Enviando arquivo...');
+
+
+        /*
+         * Monta os dados enviados ao Apps Script.
          */
-        if (!this.idPlano) {
+        const dados = {
 
-            Toast.warning(
-                'Salve o plano antes de enviar um arquivo.'
-            );
+            idPlano: this.idPlano,
 
-            return;
-        }
+            nomeArquivo: arquivo.name,
 
+            mimeType: arquivo.type,
 
-        /**
-         * Tipos permitidos
-         */
-        const tiposPermitidos = [
+            arquivoBase64: base64
 
-            'application/pdf',
-
-            'image/jpeg',
-
-            'image/png'
-
-        ];
+        };
 
 
-        if (!tiposPermitidos.includes(arquivo.type)) {
-
-            console.warn(
-                '[DriveAnexos.upload] Tipo não permitido:',
-                arquivo.type
-            );
-
-            Toast.warning(
-                'Apenas PDF, JPG ou PNG são permitidos.'
-            );
-
-            return;
-        }
-
-
-        /**
-         * Verifica token
-         */
-        const token = api.getToken();
-
-
-        console.log(
-            '[DriveAnexos.upload] Token existe?',
-            !!token
-        );
-
-
-        if (!token) {
-
-            Toast.error(
-                'Sua sessão expirou. Faça login novamente.'
-            );
-
-            return;
-        }
-
-
-        /**
-         * Cria FormData
-         */
-        const formData =
-            new FormData();
-
-
-        formData.append(
-            'idPlano',
-            this.idPlano
-        );
-
-
-        formData.append(
-            'arquivo',
-            arquivo
-        );
-
-
-        console.log(
-            '[DriveAnexos.upload] FormData criado.'
-        );
-
-
-        /**
-         * URL do Apps Script
-         */
         const url =
             `${CONFIG.APPS_SCRIPT_URL}` +
             `?action=uploadAnexo` +
@@ -383,215 +347,133 @@ const DriveAnexos = {
 
 
         console.log(
-            '[DriveAnexos.upload] URL:',
-            url
+            '[DriveAnexos.upload] Enviando para Apps Script...'
         );
 
 
-        /**
-         * Mostra carregamento
-         */
-        UI.showLoading(
-            'Enviando arquivo...'
+        const response = await fetch(
+            url,
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type':
+                        'text/plain;charset=utf-8'
+                },
+
+                body: JSON.stringify(dados)
+            }
         );
 
+
+        console.log(
+            '[DriveAnexos.upload] HTTP:',
+            response.status
+        );
+
+
+        const texto =
+            await response.text();
+
+
+        console.log(
+            '[DriveAnexos.upload] Resposta:',
+            texto
+        );
+
+
+        let resultado;
 
         try {
 
-            console.log(
-                '[DriveAnexos.upload] Iniciando fetch...'
-            );
-
-
-            /**
-             * Envia para o Apps Script
-             */
-            const response =
-                await fetch(
-                    url,
-                    {
-                        method: 'POST',
-
-                        body: formData
-                    }
-                );
-
-
-            console.log(
-                '[DriveAnexos.upload] Resposta recebida.'
-            );
-
-
-            console.log(
-                '[DriveAnexos.upload] HTTP status:',
-                response.status
-            );
-
-
-            console.log(
-                '[DriveAnexos.upload] HTTP ok:',
-                response.ok
-            );
-
-
-            /**
-             * Lê primeiro como texto.
-             *
-             * Isso é proposital para conseguirmos
-             * enxergar uma eventual resposta que
-             * não seja JSON.
-             */
-            const texto =
-                await response.text();
-
-
-            console.log(
-                '[DriveAnexos.upload] Resposta bruta:'
-            );
-
-
-            console.log(
-                texto
-            );
-
-
-            /**
-             * Tenta transformar em JSON
-             */
-            let resultado;
-
-
-            try {
-
-                resultado =
-                    JSON.parse(texto);
-
-            } catch (jsonError) {
-
-                console.error(
-                    '[DriveAnexos.upload] Resposta não é JSON:',
-                    jsonError
-                );
-
-                throw new Error(
-                    'O servidor não retornou uma resposta JSON. ' +
-                    'Resposta recebida: ' +
-                    texto.substring(0, 500)
-                );
-            }
-
-
-            console.log(
-                '[DriveAnexos.upload] JSON recebido:',
-                resultado
-            );
-
-
-            /**
-             * Verifica erro retornado pelo Apps Script
-             */
-            if (!resultado.success) {
-
-                const mensagem =
-
-                    resultado.message ||
-
-                    resultado.details ||
-
-                    resultado.error ||
-
-                    'ERRO_UPLOAD';
-
-
-                console.error(
-                    '[DriveAnexos.upload] Erro informado pelo servidor:',
-                    mensagem
-                );
-
-
-                throw new Error(
-                    mensagem
-                );
-            }
-
-
-            /**
-             * Upload realizado
-             */
-            console.log(
-                '[DriveAnexos.upload] UPLOAD REALIZADO COM SUCESSO'
-            );
-
-
-            console.log(
-                '[DriveAnexos.upload] Dados:',
-                resultado.data
-            );
-
-
-            Toast.success(
-                'Arquivo enviado com sucesso!'
-            );
-
-
-            /**
-             * Limpa o campo
-             */
-            input.value = '';
-
-
-            /**
-             * Atualiza lista
-             */
-            await this.carregar();
-
+            resultado =
+                JSON.parse(texto);
 
         } catch (error) {
 
             console.error(
-                '=========================================='
+                '[DriveAnexos.upload] Resposta inválida:',
+                texto
             );
 
-            console.error(
-                '[DriveAnexos.upload] ERRO'
+            throw new Error(
+                'O servidor não retornou uma resposta válida.'
             );
 
-            console.error(
-                'Mensagem:',
-                error.message
+        }
+
+
+        if (!resultado.success) {
+
+            throw new Error(
+
+                resultado.message ||
+
+                resultado.details ||
+
+                resultado.error ||
+
+                'ERRO_UPLOAD'
+
             );
-
-            console.error(
-                'Erro completo:',
-                error
-            );
-
-            console.error(
-                '=========================================='
-            );
-
-
-            /**
-             * Mostra o erro real durante o diagnóstico.
-             */
-            Toast.error(
-                'Erro no envio: ' +
-                (error.message || 'Erro desconhecido')
-            );
-
-
-        } finally {
-
-            UI.hideLoading();
 
         }
 
 
         console.log(
-            '[DriveAnexos.upload] FIM DO UPLOAD'
+            '[DriveAnexos.upload] Upload concluído:',
+            resultado.data
         );
 
-    },
+
+        Toast.success(
+            'Arquivo enviado com sucesso!'
+        );
+
+
+        input.value = '';
+
+
+        await this.carregar();
+
+
+    } catch (error) {
+
+        console.error(
+            '=========================================='
+        );
+
+        console.error(
+            '[DriveAnexos.upload] ERRO'
+        );
+
+        console.error(
+            error
+        );
+
+        console.error(
+            'Mensagem:',
+            error.message
+        );
+
+        console.error(
+            '=========================================='
+        );
+
+
+        Toast.error(
+            error.message ||
+            'Não foi possível enviar o arquivo.'
+        );
+
+
+    } finally {
+
+        UI.hideLoading();
+
+    }
+
+},
 
 
     /**
