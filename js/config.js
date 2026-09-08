@@ -36,7 +36,7 @@ const CONFIG = {
         // adicione a origem do seu site em "Authorized JavaScript origins" (ex:
         // http://127.0.0.1:5500 em dev, e a URL do GitHub Pages em produção) e cole
         // o Client ID aqui. O MESMO valor precisa estar em backend/Config.gs -> GOOGLE_CLIENT_ID.
-        CLIENT_ID: '327419300290-6b3of6phhiu7h4a2knj0svl0jgcfdgof.apps.googleusercontent.com',
+        CLIENT_ID: '',
         API_KEY: '',   // Se necessário
         SCOPES: [
             'https://www.googleapis.com/auth/spreadsheets',

@@ -1,0 +1,12 @@
+Coloque aqui os seguintes arquivos (nomes exatos):
+
+icon-192.png            192x192
+icon-512.png            512x512
+icon-maskable-192.png   192x192 (arte só nos 80% centrais)
+icon-maskable-512.png   512x512 (arte só nos 80% centrais)
+icon-apple-touch-180.png 180x180
+favicon-32.png          32x32
+favicon-16.png          16x16
+
+O manifest.json, o index.html e o service-worker.js já apontam para esses
+caminhos — não precisa editar mais nada além de colocar os arquivos aqui.
