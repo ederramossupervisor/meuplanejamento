@@ -22,18 +22,22 @@ const Turmas = {
 
     async carregar() {
         const container = document.getElementById('turmas-lista');
+        if (!container) return;
         container.innerHTML = '<div class="text-center py-4 w-100"><div class="loading-spinner"></div></div>';
         try {
             const response = await api.get('listarTurmas');
             this.lista = response.data || [];
             this.renderLista();
         } catch (error) {
-            container.innerHTML = '<p class="text-muted">Não foi possível carregar as turmas.</p>';
+            if (document.getElementById('turmas-lista')) {
+                container.innerHTML = '<p class="text-muted">Não foi possível carregar as turmas.</p>';
+            }
         }
     },
 
     renderLista() {
         const container = document.getElementById('turmas-lista');
+        if (!container) return;
 
         if (this.lista.length === 0) {
             container.innerHTML = `

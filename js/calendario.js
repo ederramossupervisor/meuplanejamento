@@ -50,8 +50,10 @@ const Calendario = {
     },
 
     renderGrid() {
+        const tituloEl = document.getElementById('calendario-titulo');
+        if (!tituloEl) return; // a página mudou antes deste carregamento terminar
         const nomesMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        document.getElementById('calendario-titulo').textContent = `${nomesMeses[this.mesAtual]} de ${this.anoAtual}`;
+        tituloEl.textContent = `${nomesMeses[this.mesAtual]} de ${this.anoAtual}`;
         document.getElementById('calendario-dia-detalhe').innerHTML = '';
 
         const primeiroDia = new Date(this.anoAtual, this.mesAtual, 1);

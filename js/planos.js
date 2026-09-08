@@ -88,6 +88,7 @@ const Planos = {
 
     async carregar() {
         const container = document.getElementById('planos-lista');
+        if (!container) return; // a página mudou antes deste carregamento terminar
         container.innerHTML = '<div class="text-center py-4 w-100"><div class="loading-spinner"></div></div>';
         try {
             const params = {};
@@ -96,12 +97,15 @@ const Planos = {
             this.lista = response.data || [];
             this.renderLista();
         } catch (error) {
-            container.innerHTML = '<p class="text-muted">Não foi possível carregar os planos.</p>';
+            if (document.getElementById('planos-lista')) {
+                container.innerHTML = '<p class="text-muted">Não foi possível carregar os planos.</p>';
+            }
         }
     },
 
     renderLista() {
         const container = document.getElementById('planos-lista');
+        if (!container) return; // a página mudou antes deste carregamento terminar
 
         if (this.lista.length === 0) {
             container.innerHTML = `

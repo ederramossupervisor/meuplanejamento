@@ -37,18 +37,22 @@ const Componentes = {
 
     async carregar() {
         const tbody = document.getElementById('componentes-tbody');
+        if (!tbody) return;
         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="loading-spinner"></div></td></tr>';
         try {
             const response = await api.get('listarComponentes');
             this.lista = response.data || [];
             this.renderLista();
         } catch (error) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Não foi possível carregar os componentes.</td></tr>';
+            if (document.getElementById('componentes-tbody')) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Não foi possível carregar os componentes.</td></tr>';
+            }
         }
     },
 
     renderLista() {
         const tbody = document.getElementById('componentes-tbody');
+        if (!tbody) return;
 
         if (this.lista.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Nenhum componente cadastrado ainda.</td></tr>';
