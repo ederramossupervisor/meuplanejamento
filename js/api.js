@@ -76,7 +76,6 @@ class API {
             const result = await response.json();
 
             if (result.success === false) {
-                prompt('Copie o texto abaixo (Ctrl+A, Ctrl+C):', JSON.stringify(result));
                 throw new Error(result.error || 'ERRO_DESCONHECIDO');
             }
 
