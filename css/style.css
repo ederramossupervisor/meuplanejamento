@@ -195,7 +195,7 @@ body {
     content: '';
     position: fixed;
     top: 0;
-    left: 0;
+    left: var(--sidebar-width);
     right: 0;
     bottom: 0;
     background-image: url('../assets/icons/icon-512.png');
@@ -584,6 +584,10 @@ body {
     
     .conteudo {
         padding: 15px;
+    }
+    
+    .dashboard-page::before {
+        left: 0;
     }
     
     .documento-info-grid {
