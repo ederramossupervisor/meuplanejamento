@@ -112,6 +112,7 @@ class App {
                 UI.mostrarTelaConfigInicial();
             } else {
                 UI.mostrarApp();
+                UI.mostrarUsuario(this.dadosUsuario || auth.getUsuario());
                 await this.navegarPara('dashboard');
             }
         } catch (error) {
@@ -214,21 +215,13 @@ class App {
     }
 
     /**
-     * Abre a Gem do Gemini
+     * Abre a Gem do Gemini (mesma URL para todos os usuários)
      */
-    async abrirGemini() {
-        try {
-            // Buscar URL da Gem na configuração
-            const response = await api.get('getConfiguracao', { chave: 'URL_GEM_GEMINI' });
-            
-            if (response.data && response.data.valor) {
-                window.open(response.data.valor, '_blank');
-            } else {
-                Toast.warning('URL da Gem Gemini não configurada. Acesse Configurações.');
-                this.navegarPara('configuracoes');
-            }
-        } catch (error) {
-            Toast.error('Não foi possível abrir a Gem Gemini.');
+    abrirGemini() {
+        if (CONFIG.URLS.GEM_GEMINI) {
+            window.open(CONFIG.URLS.GEM_GEMINI, '_blank');
+        } else {
+            Toast.warning('URL da Gem Gemini não configurada.');
         }
     }
 

@@ -15,13 +15,23 @@ const UI = {
         document.getElementById('app').classList.remove('d-none');
     },
     mostrarUsuario(usuario) {
+        const nomeExibicao = usuario.nome || usuario.email;
+        const fotoSrc = usuario.foto ? usuario.foto : UI.avatarIniciais(nomeExibicao);
+
         const avatar = document.getElementById('user-avatar-mini');
         const nome = document.getElementById('user-name-mini');
+        avatar.onerror = () => { avatar.onerror = null; avatar.src = UI.avatarIniciais(nomeExibicao); };
+        avatar.src = fotoSrc;
+        nome.textContent = nomeExibicao;
 
-        avatar.onerror = () => { avatar.onerror = null; avatar.src = UI.avatarIniciais(usuario.nome || usuario.email); };
-        avatar.src = usuario.foto ? usuario.foto : UI.avatarIniciais(usuario.nome || usuario.email);
-
-        nome.textContent = usuario.nome || usuario.email;
+        // Também exibe o nome do usuário no topo (topbar), em todas as páginas
+        const avatarTopo = document.getElementById('user-avatar-topo');
+        const nomeTopo = document.getElementById('user-name-topo');
+        if (avatarTopo && nomeTopo) {
+            avatarTopo.onerror = () => { avatarTopo.onerror = null; avatarTopo.src = UI.avatarIniciais(nomeExibicao); };
+            avatarTopo.src = fotoSrc;
+            nomeTopo.textContent = nomeExibicao;
+        }
     },
     /**
      * Gera um avatar simples (círculo colorido com a inicial do nome) como

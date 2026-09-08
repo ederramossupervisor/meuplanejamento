@@ -111,6 +111,29 @@ body {
     object-fit: cover;
 }
 
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 15px;
+    padding-right: 15px;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    font-weight: 500;
+    color: var(--dark-color);
+}
+
+#user-name-topo {
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .btn-logout {
     width: 100%;
     padding: 10px;
@@ -546,6 +569,15 @@ body {
     
     .card-stats .value {
         font-size: 1.5rem;
+    }
+
+    #user-name-topo {
+        display: none;
+    }
+
+    .topbar-user {
+        margin-right: 8px;
+        padding-right: 8px;
     }
 }
 /* Calendário */

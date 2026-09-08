@@ -25,7 +25,8 @@ const CONFIG = {
     
     // URLs padrão (para desenvolvimento)
     URLS: {
-        GEM_GEMINI: '', // Será carregada da planilha de configurações
+        // Gem do Gemini única para todos os usuários (não é mais configurável por professor)
+        GEM_GEMINI: 'https://gemini.google.com/gem/1xLMNPdzpKWAAUdE-NLrO5JGpKZxr9SPV?usp=sharing',
         LOGIN: '#',
     },
     
