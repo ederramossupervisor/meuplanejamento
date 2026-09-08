@@ -1,8 +1,11 @@
 const Dashboard = {
     async render() {
         const content = document.getElementById('conteudo');
+        const usuario = auth.getUsuario();
+        const primeiroNome = (usuario?.nome || '').trim().split(' ')[0];
+        const saudacao = primeiroNome ? `Olá, ${UI.escaparHTML(primeiroNome)}!` : 'Olá, professor(a)!';
         content.innerHTML = `
-            <h2>Olá, Professor!</h2>
+            <h2>${saudacao}</h2>
             <p>Bem-vindo ao ${CONFIG.APP_NAME}</p>
             <div class="row mt-4">
                 <div class="col-md-3 mb-3">
