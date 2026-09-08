@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a73e8">
+    <title>Meu Planejamento</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/impressao.css" rel="stylesheet">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
+    <!-- Google Identity Services (login) -->
+    <script src="https://accounts.google.com/gsi/client"></script>
+</head>
+<body>
+
+<!-- ============ TELA DE LOGIN ============ -->
+<div id="tela-login" class="tela-login d-none">
+    <div class="card-login">
+        <div class="logo-login">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <h1>Meu Planejamento</h1>
+            <p>Planejamento de Aulas para Professores</p>
+        </div>
+        <button id="btn-login-google" class="btn-google">
+            <i class="fab fa-google"></i>
+            Entrar com Google
+        </button>
+    </div>
+</div>
+
+<!-- ============ TELA DE CONFIGURAÇÃO INICIAL ============ -->
+<div id="tela-config-inicial" class="d-none">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-body p-5 text-center">
+                        <i class="fas fa-folder-open" style="font-size: 4rem; color: #1a73e8;"></i>
+                        <h2 class="mt-3">Preparando seu espaço de planejamento</h2>
+                        <p class="text-muted">Antes de começar, precisamos preparar sua planilha de dados personalizada. Isso permitirá salvar todos os seus planos com segurança.</p>
+                        <button id="btn-criar-planilha" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus-circle"></i>
+                            CRIAR MINHA PLANILHA
+                        </button>
+                        <div id="status-config" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ APLICAÇÃO PRINCIPAL ============ -->
+<div id="app" class="d-none">
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Meu Planejamento</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" data-page="dashboard" class="nav-link active">
+                <i class="fas fa-home"></i>
+                <span>Início</span>
+            </a>
+            <a href="#" data-page="planos" class="nav-link">
+                <i class="fas fa-book"></i>
+                <span>Meus Planos</span>
+            </a>
+            <a href="#" data-page="novo-plano" class="nav-link">
+                <i class="fas fa-plus-circle"></i>
+                <span>Novo Plano</span>
+            </a>
+            <a href="#" data-page="calendario" class="nav-link">
+                <i class="fas fa-calendar"></i>
+                <span>Calendário</span>
+            </a>
+            <a href="#" data-page="turmas" class="nav-link">
+                <i class="fas fa-school"></i>
+                <span>Minhas Turmas</span>
+            </a>
+            <a href="#" data-page="componentes" class="nav-link">
+                <i class="fas fa-list-alt"></i>
+                <span>Componentes</span>
+            </a>
+            <a href="#" id="btn-gemini" class="nav-link">
+                <i class="fas fa-sparkles"></i>
+                <span>✨ Gemini</span>
+            </a>
+            <a href="#" data-page="configuracoes" class="nav-link">
+                <i class="fas fa-cog"></i>
+                <span>Configurações</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div id="user-info-mini">
+                <img id="user-avatar-mini" src="" alt="Avatar" class="avatar">
+                <span id="user-name-mini"></span>
+            </div>
+            <button id="btn-logout" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Sair
+            </button>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <div class="topbar">
+            <button class="btn-menu-mobile" id="btn-menu-mobile">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-actions">
+                <button class="btn btn-sm btn-primary" onclick="abrirNovoPlano()">
+                    <i class="fas fa-plus"></i>
+                    Novo Plano
+                </button>
+            </div>
+        </div>
+
+        <!-- Páginas -->
+        <div id="conteudo" class="conteudo">
+            <!-- Conteúdo carregado dinamicamente -->
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL VISUALIZAÇÃO ============ -->
+<div class="modal fade" id="modal-visualizacao" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Prévia do Plano de Aula</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="conteudo-visualizacao">
+                <!-- Conteúdo do plano -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button class="btn btn-primary" onclick="imprimirPlano()">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button class="btn btn-success" onclick="baixarPDF()">
+                    <i class="fas fa-file-pdf"></i> Baixar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/planos.js"></script>
+<script src="js/formularioPlano.js"></script>
+<script src="js/turmas.js"></script>
+<script src="js/componentes.js"></script>
+<script src="js/visualizacao.js"></script>
+<script src="js/calendario.js"></script>
+<script src="js/configuracoes.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/drive.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

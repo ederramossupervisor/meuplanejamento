@@ -1,0 +1,22 @@
+{
+    "name": "Meu Planejamento",
+    "short_name": "Meu Planejamento",
+    "description": "Sistema de Planejamento de Aulas para Professores da Rede Pública do Espírito Santo",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#1a73e8",
+    "theme_color": "#1a73e8",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "assets/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "assets/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
